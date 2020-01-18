@@ -6,7 +6,7 @@ import uuid
 app = Flask(__name__)
 
 client = boto3.client('dynamodb', region_name='eu-west-2')
-#CONTACTS_TABLE = os.environ.get('CONTACTS_TABLE', 'contacts')
+CONTACTS_TABLE = os.environ.get('CONTACTS_TABLE', 'contacts')
 
 
 @app.route('/')
@@ -18,6 +18,13 @@ def hello_world():
 def submit_contact():
     data = request.json
 
+    for item in ['first_name', 'last_name', 'email', 'message']:
+        if item not in data:
+            return jsonify({
+                'status': 'error',
+                'message': f'Missing required {item} parameter'
+            }), 400
+
     first_name = data.get('first_name', None)
     last_name = data.get('last_name', None)
     email = data.get('email', None)
@@ -25,7 +32,7 @@ def submit_contact():
 
     submission_id = uuid.uuid4().hex
 
-    """client.put_item(
+    client.put_item(
         TableName=CONTACTS_TABLE,
         # the 'S' here is for String:
         Item={
@@ -35,7 +42,7 @@ def submit_contact():
             'email': {'S': email},
             'message': {'S': message}
         }
-    )"""
+    )
 
     return jsonify({
         'status': 'success',

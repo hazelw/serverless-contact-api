@@ -45,6 +45,30 @@ class TestSubmission(unittest.TestCase):
         for item in ['id', 'first_name', 'last_name', 'email', 'message']:
             assert item in response_data['submission']
 
+    def test_missing_params(self):
+        payload = {
+            'first_name': 'Hazel',
+            'last_name': 'Wright',
+            'email': 'test@hazelsarahwright.com'
+        }
+
+        response = self.app.post(
+            '/submissions',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+
+        assert response.status_code == 400
+        
+        response_data = json.loads(response.get_data())
+
+        assert 'status' in response_data
+        assert 'message' in response_data
+
+        assert response_data['message'] == (
+            'Missing required message parameter'
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
